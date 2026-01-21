@@ -1,4 +1,4 @@
-package com.example.chatzar_android.feature.auth
+package com.example.chatzar_android.feature.auth.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

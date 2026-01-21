@@ -1,4 +1,4 @@
-package com.example.chatzar_android.feature.auth
+package com.example.chatzar_android.feature.auth.login
 
 import com.example.chatzar_android.data.remote.dto.LoginResponse
 
