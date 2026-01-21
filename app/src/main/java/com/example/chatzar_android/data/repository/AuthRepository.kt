@@ -7,7 +7,8 @@ import com.example.chatzar_android.data.remote.dto.LoginResponse
 class AuthRepository (
     private val authApi: AuthApi
 ) {
-    suspend fun login (email: String, password: String): LoginResponse {
-        return authApi.login(LoginRequest(email, password))
+    suspend fun login(request: LoginRequest): Response<LoginResponse> {
+        return authApi.login(request)
+    }
     }
 }
