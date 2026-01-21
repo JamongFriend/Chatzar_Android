@@ -27,7 +27,6 @@ class SignupFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // API 및 Repository 준비 (나중엔 Hilt 같은 DI를 쓰면 더 깔끔합니다)
         val authApi = ApiClient.retrofit.create(AuthApi::class.java)
         val repo = AuthRepository(authApi)
 
@@ -37,9 +36,8 @@ class SignupFragment : Fragment() {
             val password = binding.etSignupPassword.text.toString()
 
             // TODO: ViewModel을 통해 회원가입 API 호출 로직 구현
-            // 성공 시 다시 로그인 화면으로 돌아가게 처리
             Toast.makeText(requireContext(), "회원가입 요청: $nickname", Toast.LENGTH_SHORT).show()
-            findNavController().popBackStack() // 이전 화면(로그인)으로 돌아가기
+            findNavController().popBackStack()
         }
     }
 

@@ -32,24 +32,20 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. 기존 LoginActivity의 초기화 로직 (this 대신 viewLifecycleOwner 사용)
         val authApi = ApiClient.retrofit.create(AuthApi::class.java)
         val repo = AuthRepository(authApi)
         vm = ViewModelProvider(this, LoginViewModelFactory(repo))[LoginViewModel::class.java]
 
-        // 2. 로그인 버튼 클릭 로직
         binding.btnLogin.setOnClickListener {
             val email = binding.etEmail.text.toString()
             val password = binding.etPassword.text.toString()
             vm.login(email, password)
         }
 
-        // 3. 회원가입 화면으로 이동 (아까 만든 nav_graph 액션 사용)
         binding.tvGoSignup.setOnClickListener {
             findNavController().navigate(R.id.action_loginFragment_to_signupFragment)
         }
 
-        // 4. UI 상태 관찰 (lifecycleScope 유지)
         viewLifecycleOwner.lifecycleScope.launch {
             vm.state.collect { state ->
                 when (state) {
@@ -57,7 +53,6 @@ class LoginFragment : Fragment() {
                     is LoginUiState.Loading -> Toast.makeText(requireContext(), "로그인 중...", Toast.LENGTH_SHORT).show()
                     is LoginUiState.Success -> {
                         Toast.makeText(requireContext(), "성공! ID=${state.data.memberId}", Toast.LENGTH_LONG).show()
-                        // 로그인 성공 후 메인 화면으로 이동하거나 프래그먼트 종료
                     }
                     is LoginUiState.Error -> Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
                 }

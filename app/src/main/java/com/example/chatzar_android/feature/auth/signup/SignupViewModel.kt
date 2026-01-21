@@ -17,7 +17,7 @@ class SignupViewModel(private val repository: AuthRepository) : ViewModel() {
         viewModelScope.launch {
             _state.value = SignupUiState.Loading
             try {
-                val response = repository.signup(request) // AuthRepository에 signup 함수 추가 필요
+                val response = repository.signup(request)
                 if (response.isSuccessful && response.body() != null) {
                     _state.value = SignupUiState.Success(response.body()!!)
                 } else {
