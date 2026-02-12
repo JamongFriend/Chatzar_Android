@@ -8,32 +8,52 @@
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.chatzar_android.feature.auth.login.LoginFragment"
-        android:label="Login"
+        android:label="로그인"
         tools:layout="@layout/auth_fragment_login">
-
         <action
-            android:id="@+id/action_loginFragment_to_signupFragment"
-            app:destination="@id/signupFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim" />
-
-        <action
-            android:id="@+id/action_loginFragment_to_chatListFragment"
+            android:id="@+id/action_login_to_chatList"
             app:destination="@id/chatListFragment"
             app:popUpTo="@id/loginFragment"
-            app:popUpToInclusive="true" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/signupFragment"
-        android:name="com.example.chatzar_android.feature.auth.signup.SignupFragment"
-        android:label="Signup"
-        tools:layout="@layout/auth_fragment_signup" />
+            app:popUpToInclusive="true" /> </fragment>
 
     <fragment
         android:id="@+id/chatListFragment"
         android:name="com.example.chatzar_android.feature.chat.ChatListFragment"
-        android:label="Chat List"
-        tools:layout="@layout/chat_fragment_list" />
+        android:label="채팅 목록"
+        tools:layout="@layout/chat_fragment_list">
+        <action
+            android:id="@+id/action_chatList_to_chatDetail"
+            app:destination="@id/chatDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/chatDetailFragment"
+        android:name="com.example.chatzar_android.feature.chat.ChatDetailFragment"
+        android:label="채팅방"
+        tools:layout="@layout/chat_fragment_detail">
+        <argument
+            android:name="roomId"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/matchStartFragment"
+        android:name="com.example.chatzar_android.feature.match.MatchStartFragment"
+        tools:layout="@layout/match_fragment_start">
+        <action
+            android:id="@+id/action_start_to_process"
+            app:destination="@id/matchingProcessFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/matchingProcessFragment"
+        android:name="com.example.chatzar_android.feature.match.MatchingProcessFragment"
+        tools:layout="@layout/match_fragment_matching_process">
+        <action
+            android:id="@+id/action_process_to_chatDetail"
+            app:destination="@id/chatDetailFragment"
+            app:popUpTo="@id/matchStartFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
 
 </navigation>
