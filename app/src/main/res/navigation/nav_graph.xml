@@ -9,7 +9,7 @@
         android:id="@+id/loginFragment"
         android:name="com.example.chatzar_android.feature.auth.login.LoginFragment"
         android:label="Login"
-        tools:layout="@layout/fragment_login">
+        tools:layout="@layout/auth_fragment_login">
 
         <action
             android:id="@+id/action_loginFragment_to_signupFragment"
@@ -28,12 +28,12 @@
         android:id="@+id/signupFragment"
         android:name="com.example.chatzar_android.feature.auth.signup.SignupFragment"
         android:label="Signup"
-        tools:layout="@layout/fragment_signup" />
+        tools:layout="@layout/auth_fragment_signup" />
 
     <fragment
         android:id="@+id/chatListFragment"
         android:name="com.example.chatzar_android.feature.chat.ChatListFragment"
         android:label="Chat List"
-        tools:layout="@layout/fragment_chat_list" />
+        tools:layout="@layout/chat_fragment_list" />
 
 </navigation>

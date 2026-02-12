@@ -39,5 +39,4 @@
             android:text="전송"
             android:layout_marginStart="8dp" />
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
