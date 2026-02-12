@@ -27,6 +27,19 @@ android {
         viewBinding = true
     }
 
+    sourceSets {
+        main {
+            res.srcDirs = [
+                    'src/main/res/layout/auth',
+                    'src/main/res/layout/chat',
+                    'src/main/res/layout/common',
+                    'src/main/res/layout',
+                    'src/main/res/navigation',
+                    'src/main/res'
+            ]
+        }
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
