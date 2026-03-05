@@ -12,9 +12,44 @@
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:stackFromEnd="true"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/layout_input"
+        app:layout_constraintBottom_toTopOf="@id/layout_lock_notice"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_lock_notice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFEBEB"
+        android:padding="12dp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@id/layout_input">
+
+        <TextView
+            android:id="@+id/tv_lock_hint"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="친구 추가 후에만 대화가 가능합니다."
+            android:textColor="#FF3B30"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btn_request_friend"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
+            android:id="@+id/btn_request_friend"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="친구신청"
+            android:textSize="11sp"
+            android:backgroundTint="#FF3B30"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/layout_input"
@@ -33,14 +68,13 @@
             android:hint="메시지를 입력하세요"
             android:background="@null"
             android:padding="10dp"
-            android:maxLines="3" />
-
-        <Button
-            android:id="@+id/btn_send"
-            android:layout_width="60dp"
-            android:layout_height="40dp"
-            android:text="전송"
-            android:textSize="12sp" />
-    </LinearLayout>
+            android:maxLines="3"
+            android:enabled="false" /> <Button
+        android:id="@+id/btn_send"
+        android:layout_width="60dp"
+        android:layout_height="40dp"
+        android:text="전송"
+        android:textSize="12sp"
+        android:enabled="false" /> </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

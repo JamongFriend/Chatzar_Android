@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation libs.cardview
 
     def nav_version = "2.7.7"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
