@@ -7,12 +7,14 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.chatzar_android.core.network.ApiClient
 import com.example.chatzar_android.data.remote.api.AuthApi
 import com.example.chatzar_android.data.remote.dto.SignupRequest
 import com.example.chatzar_android.data.repository.AuthRepository
 import com.example.chatzar_android.databinding.AuthFragmentSignupBinding
+import kotlinx.coroutines.launch
 
 class SignupFragment : Fragment() {
     private var _binding: AuthFragmentSignupBinding? = null
@@ -36,6 +38,11 @@ class SignupFragment : Fragment() {
         val factory = SignupViewModelFactory(repo)
         viewModel = ViewModelProvider(this, factory)[SignupViewModel::class.java]
 
+        setupListeners()
+        observeState()
+    }
+
+    private fun setupListeners() {
         binding.btnSignupSubmit.setOnClickListener {
             val email = binding.etSignupEmail.text.toString()
             val nickname = binding.etSignupNickname.text.toString()
@@ -43,10 +50,26 @@ class SignupFragment : Fragment() {
 
             val request = SignupRequest(email, nickname, password)
             viewModel.signup(request)
+        }
+    }
 
-            // TODO: ViewModel을 통해 회원가입 API 호출 로직 구현
-            Toast.makeText(requireContext(), "회원가입 요청: $nickname", Toast.LENGTH_SHORT).show()
-            findNavController().popBackStack()
+    private fun observeState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.state.collect { state ->
+                when (state) {
+                    is SignupUiState.Idle -> Unit
+                    is SignupUiState.Loading -> {
+                        Toast.makeText(requireContext(), "회원가입 중...", Toast.LENGTH_SHORT).show()
+                    }
+                    is SignupUiState.Success -> {
+                        Toast.makeText(requireContext(), "회원가입 성공! 로그인해주세요.", Toast.LENGTH_SHORT).show()
+                        findNavController().popBackStack()
+                    }
+                    is SignupUiState.Error -> {
+                        Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
         }
     }
 
