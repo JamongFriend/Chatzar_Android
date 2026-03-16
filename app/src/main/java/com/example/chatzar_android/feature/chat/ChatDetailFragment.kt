@@ -16,11 +16,14 @@ import com.example.chatzar_android.data.repository.MessageRepository
 import com.example.chatzar_android.databinding.ChatFragmentDetailBinding
 import kotlinx.coroutines.launch
 
+import com.example.chatzar_android.core.network.TokenManager
+
 class ChatDetailFragment : Fragment() {
     private var _binding: ChatFragmentDetailBinding? = null
     private val binding get() = _binding!!
     private lateinit var viewModel: ChatDetailViewModel
     private lateinit var adapter: ChatDetailAdapter
+    private lateinit var tokenManager: TokenManager
     private var roomId: Long = -1
 
     override fun onCreateView(
@@ -28,6 +31,7 @@ class ChatDetailFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        tokenManager = TokenManager(requireContext())
         _binding = ChatFragmentDetailBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -49,7 +53,10 @@ class ChatDetailFragment : Fragment() {
 
         // 초기 데이터 로딩 및 WebSocket 연결
         viewModel.getMessages(roomId)
-        viewModel.connectAndSubscribe(roomId, "ws://10.0.2.2:8080/ws/chat") // 에뮬레이터 기준 로컬 서버 주소
+        
+        // 서버 주소와 토큰을 함께 전달 (STOMP 연결 시 인증용)
+        val wsUrl = "ws://10.0.2.2:8080/ws/chat"
+        viewModel.connectAndSubscribe(roomId, wsUrl)
     }
 
     private fun setupViewModel() {
@@ -60,11 +67,11 @@ class ChatDetailFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        // TODO: 실제 로그인한 유저의 ID를 넘겨줘야 함 (지금은 임시 0)
-        adapter = ChatDetailAdapter(myMemberId = 0L) 
+        val myId = tokenManager.getMemberId()
+        adapter = ChatDetailAdapter(myMemberId = myId) 
         binding.rvChatMessages.apply {
             layoutManager = LinearLayoutManager(requireContext()).apply {
-                stackFromEnd = true // 메시지가 아래서부터 쌓임
+                stackFromEnd = true
             }
             this.adapter = this@ChatDetailFragment.adapter
         }

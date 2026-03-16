@@ -12,10 +12,10 @@ import com.example.chatzar_android.core.network.ApiClient
 import com.example.chatzar_android.data.remote.api.AuthApi
 import com.example.chatzar_android.data.remote.dto.SignupRequest
 import com.example.chatzar_android.data.repository.AuthRepository
-import com.example.chatzar_android.databinding.FragmentSignupBinding
+import com.example.chatzar_android.databinding.AuthFragmentSignupBinding
 
 class SignupFragment : Fragment() {
-    private var _binding: FragmentSignupBinding? = null
+    private var _binding: AuthFragmentSignupBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var viewModel: SignupViewModel
@@ -24,7 +24,7 @@ class SignupFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentSignupBinding.inflate(inflater, container, false)
+        _binding = AuthFragmentSignupBinding.inflate(inflater, container, false)
         return binding.root
     }
 
