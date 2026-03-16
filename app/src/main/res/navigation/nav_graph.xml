@@ -5,17 +5,30 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/loginFragment">
 
+    <!-- 로그인 화면 -->
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.chatzar_android.feature.auth.login.LoginFragment"
         android:label="로그인"
         tools:layout="@layout/auth_fragment_login">
         <action
+            android:id="@+id/action_loginFragment_to_signupFragment"
+            app:destination="@id/signupFragment" />
+        <action
             android:id="@+id/action_login_to_chatList"
             app:destination="@id/chatListFragment"
             app:popUpTo="@id/loginFragment"
-            app:popUpToInclusive="true" /> </fragment>
+            app:popUpToInclusive="true" />
+    </fragment>
 
+    <!-- 회원가입 화면 -->
+    <fragment
+        android:id="@+id/signupFragment"
+        android:name="com.example.chatzar_android.feature.auth.signup.SignupFragment"
+        android:label="회원가입"
+        tools:layout="@layout/auth_fragment_signup" />
+
+    <!-- 채팅 목록 화면 -->
     <fragment
         android:id="@+id/chatListFragment"
         android:name="com.example.chatzar_android.feature.chat.ChatListFragment"
@@ -24,8 +37,47 @@
         <action
             android:id="@+id/action_chatList_to_chatDetail"
             app:destination="@id/chatDetailFragment" />
+        <action
+            android:id="@+id/action_chatList_to_matchPreference"
+            app:destination="@id/matchPreferenceFragment" />
     </fragment>
 
+    <!-- 매칭 조건 설정 화면 (Preference) -->
+    <fragment
+        android:id="@+id/matchPreferenceFragment"
+        android:name="com.example.chatzar_android.feature.match.preference.MatchPreferenceFragment"
+        android:label="매칭 설정"
+        tools:layout="@layout/match_fragment_preference">
+        <action
+            android:id="@+id/action_matchPreferenceFragment_to_matchStartFragment"
+            app:destination="@id/matchStartFragment" />
+    </fragment>
+
+    <!-- 매칭 시작 준비 화면 (Start) -->
+    <fragment
+        android:id="@+id/matchStartFragment"
+        android:name="com.example.chatzar_android.feature.match.MatchStartFragment"
+        android:label="매칭 준비"
+        tools:layout="@layout/match_fragment_start">
+        <action
+            android:id="@+id/action_matchStartFragment_to_matchProcessFragment"
+            app:destination="@id/matchProcessFragment" />
+    </fragment>
+
+    <!-- 매칭 진행/대기 화면 (Process) -->
+    <fragment
+        android:id="@+id/matchProcessFragment"
+        android:name="com.example.chatzar_android.feature.match.MatchProcessFragment"
+        android:label="매칭 중"
+        tools:layout="@layout/match_fragment_matching_process">
+        <action
+            android:id="@+id/action_matchProcessFragment_to_chatDetailFragment"
+            app:destination="@id/chatDetailFragment"
+            app:popUpTo="@id/matchStartFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- 채팅방 상세 화면 -->
     <fragment
         android:id="@+id/chatDetailFragment"
         android:name="com.example.chatzar_android.feature.chat.ChatDetailFragment"
@@ -34,26 +86,6 @@
         <argument
             android:name="roomId"
             app:argType="string" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/matchStartFragment"
-        android:name="com.example.chatzar_android.feature.match.MatchStartFragment"
-        tools:layout="@layout/match_fragment_start">
-        <action
-            android:id="@+id/action_start_to_process"
-            app:destination="@id/matchingProcessFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/matchingProcessFragment"
-        android:name="com.example.chatzar_android.feature.match.MatchingProcessFragment"
-        tools:layout="@layout/match_fragment_matching_process">
-        <action
-            android:id="@+id/action_process_to_chatDetail"
-            app:destination="@id/chatDetailFragment"
-            app:popUpTo="@id/matchStartFragment"
-            app:popUpToInclusive="true" />
     </fragment>
 
 </navigation>
