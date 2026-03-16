@@ -37,7 +37,7 @@ class ChatListFragment : Fragment() {
 
         setupViewModel()
         setupRecyclerView()
-        setupListeners() // 추가
+        setupListeners()
         observeState()
 
         viewModel.getMyChatRooms()
@@ -51,9 +51,12 @@ class ChatListFragment : Fragment() {
     }
 
     private fun setupListeners() {
-        // 채팅방 추가(매칭 설정) 버튼 클릭 시 매칭 화면으로 이동
         binding.fabAddChat.setOnClickListener {
             findNavController().navigate(R.id.action_chatList_to_matchPreference)
+        }
+
+        binding.btnGoMypage.setOnClickListener {
+            findNavController().navigate(R.id.action_chatList_to_myPage)
         }
     }
 

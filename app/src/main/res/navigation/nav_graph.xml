@@ -40,7 +40,28 @@
         <action
             android:id="@+id/action_chatList_to_matchPreference"
             app:destination="@id/matchPreferenceFragment" />
+        <action
+            android:id="@+id/action_chatList_to_myPage"
+            app:destination="@id/myPageFragment" />
     </fragment>
+
+    <!-- 마이페이지 화면 -->
+    <fragment
+        android:id="@+id/myPageFragment"
+        android:name="com.example.chatzar_android.feature.auth.profile.MyPageFragment"
+        android:label="마이페이지"
+        tools:layout="@layout/member_fragment_profile">
+        <action
+            android:id="@+id/action_myPage_to_profileEdit"
+            app:destination="@id/profileEditFragment" />
+    </fragment>
+
+    <!-- 프로필 수정 화면 -->
+    <fragment
+        android:id="@+id/profileEditFragment"
+        android:name="com.example.chatzar_android.feature.auth.profile.ProfileEditFragment"
+        android:label="프로필 수정"
+        tools:layout="@layout/member_fragment_profile_edit" />
 
     <!-- 매칭 조건 설정 화면 (Preference) -->
     <fragment
