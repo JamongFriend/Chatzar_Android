@@ -67,6 +67,10 @@ class MyPageFragment : Fragment() {
             findNavController().navigate(R.id.action_chatList_to_matchPreference)
         }
 
+        binding.btnFriendRequests.setOnClickListener {
+            findNavController().navigate(R.id.action_myPage_to_friendRequests)
+        }
+
         binding.btnLogout.setOnClickListener {
             logout()
         }

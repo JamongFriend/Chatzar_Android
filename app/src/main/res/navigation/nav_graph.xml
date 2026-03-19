@@ -54,7 +54,17 @@
         <action
             android:id="@+id/action_myPage_to_profileEdit"
             app:destination="@id/profileEditFragment" />
+        <action
+            android:id="@+id/action_myPage_to_friendRequests"
+            app:destination="@id/friendRequestsFragment" />
     </fragment>
+
+    <!-- 친구 요청 목록 화면 -->
+    <fragment
+        android:id="@+id/friendRequestsFragment"
+        android:name="com.example.chatzar_android.feature.friend.FriendRequestsFragment"
+        android:label="친구 요청"
+        tools:layout="@layout/friend_fragment_requests" />
 
     <!-- 프로필 수정 화면 -->
     <fragment
