@@ -136,20 +136,22 @@ class ChatDetailFragment : Fragment() {
             }
         }
     }
-
-    private fun updateLockState(status: String) {
-        if (status == "LOCKED") {
-            binding.layoutLockNotice.visibility = View.VISIBLE
-            binding.etMessage.isEnabled = false
-            binding.btnSend.isEnabled = false
-            binding.etMessage.hint = "친구 추가 후 대화가 가능합니다."
-        } else {
-            binding.layoutLockNotice.visibility = View.GONE
-            binding.etMessage.isEnabled = true
-            binding.btnSend.isEnabled = true
-            binding.etMessage.hint = "메시지를 입력하세요"
-        }
+private fun updateLockState(status: String) {
+    // LOCKED 상태일 때만 입력창 비활성화 및 안내 노출
+    if (status == "LOCKED") {
+        binding.layoutLockNotice.visibility = View.VISIBLE
+        binding.ivLockIcon.visibility = View.VISIBLE
+        binding.etMessage.isEnabled = false
+        binding.btnSend.isEnabled = false
+        binding.etMessage.hint = "대화가 잠겨있습니다"
+    } else {
+        binding.layoutLockNotice.visibility = View.GONE
+        binding.ivLockIcon.visibility = View.GONE
+        binding.etMessage.isEnabled = true
+        binding.btnSend.isEnabled = true
+        binding.etMessage.hint = "메시지를 입력하세요"
     }
+}
 
     override fun onDestroyView() {
         super.onDestroyView()
