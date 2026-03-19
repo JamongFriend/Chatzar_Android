@@ -43,6 +43,10 @@ class SignupFragment : Fragment() {
     }
 
     private fun setupListeners() {
+        binding.btnSignupBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
+
         binding.btnSignupSubmit.setOnClickListener {
             val email = binding.etSignupEmail.text.toString()
             val nickname = binding.etSignupNickname.text.toString()

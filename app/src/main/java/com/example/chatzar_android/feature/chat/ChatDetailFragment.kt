@@ -11,7 +11,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.chatzar_android.core.network.ApiClient
+import com.example.chatzar_android.data.remote.api.ChatApi
+import com.example.chatzar_android.data.remote.api.FriendshipApi
 import com.example.chatzar_android.data.remote.api.MessageApi
+import com.example.chatzar_android.data.repository.ChatRepository
+import com.example.chatzar_android.data.repository.FriendshipRepository
 import com.example.chatzar_android.data.repository.MessageRepository
 import com.example.chatzar_android.databinding.ChatFragmentDetailBinding
 import kotlinx.coroutines.launch
@@ -25,6 +29,7 @@ class ChatDetailFragment : Fragment() {
     private lateinit var adapter: ChatDetailAdapter
     private lateinit var tokenManager: TokenManager
     private var roomId: Long = -1
+    private var otherMemberId: Long = -1
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,18 +56,23 @@ class ChatDetailFragment : Fragment() {
         setupListeners()
         observeState()
 
-        // 초기 데이터 로딩 및 WebSocket 연결
+        viewModel.getChatRoom(roomId)
         viewModel.getMessages(roomId)
-        
-        // 서버 주소와 토큰을 함께 전달 (STOMP 연결 시 인증용)
+
         val wsUrl = "ws://10.0.2.2:8080/ws/chat"
         viewModel.connectAndSubscribe(roomId, wsUrl)
     }
 
     private fun setupViewModel() {
-        val api = ApiClient.retrofit.create(MessageApi::class.java)
-        val repository = MessageRepository(api)
-        val factory = ChatDetailViewModelFactory(repository)
+        val messageApi = ApiClient.retrofit.create(MessageApi::class.java)
+        val chatApi = ApiClient.retrofit.create(ChatApi::class.java)
+        val friendshipApi = ApiClient.retrofit.create(FriendshipApi::class.java)
+        
+        val messageRepository = MessageRepository(messageApi)
+        val chatRepository = ChatRepository(chatApi)
+        val friendshipRepository = FriendshipRepository(friendshipApi)
+        
+        val factory = ChatDetailViewModelFactory(messageRepository, chatRepository, friendshipRepository)
         viewModel = ViewModelProvider(this, factory)[ChatDetailViewModel::class.java]
     }
 
@@ -90,16 +100,21 @@ class ChatDetailFragment : Fragment() {
             }
         }
 
-        // 임시로 잠금 해제 (테스트용)
-        binding.layoutLockNotice.visibility = View.GONE
-        binding.etMessage.isEnabled = true
-        binding.btnSend.isEnabled = true
+        binding.btnRequestFriend.setOnClickListener {
+            if (otherMemberId != -1L) {
+                viewModel.sendFriendRequest(otherMemberId)
+            }
+        }
     }
 
     private fun observeState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.state.collect { state ->
                 when (state) {
+                    is ChatDetailUiState.RoomStatusSuccess -> {
+                        otherMemberId = state.room.otherMemberId
+                        updateLockState(state.room.status)
+                    }
                     is ChatDetailUiState.HistorySuccess -> {
                         adapter.submitList(state.messages)
                         binding.rvChatMessages.scrollToPosition(adapter.itemCount - 1)
@@ -108,12 +123,31 @@ class ChatDetailFragment : Fragment() {
                         adapter.addMessage(state.message)
                         binding.rvChatMessages.smoothScrollToPosition(adapter.itemCount - 1)
                     }
+                    is ChatDetailUiState.FriendRequestSuccess -> {
+                        Toast.makeText(requireContext(), "친구 신청을 보냈습니다.", Toast.LENGTH_SHORT).show()
+                        binding.btnRequestFriend.isEnabled = false
+                        binding.btnRequestFriend.text = "신청완료"
+                    }
                     is ChatDetailUiState.Error -> {
                         Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
                     }
                     else -> Unit
                 }
             }
+        }
+    }
+
+    private fun updateLockState(status: String) {
+        if (status == "LOCKED") {
+            binding.layoutLockNotice.visibility = View.VISIBLE
+            binding.etMessage.isEnabled = false
+            binding.btnSend.isEnabled = false
+            binding.etMessage.hint = "친구 추가 후 대화가 가능합니다."
+        } else {
+            binding.layoutLockNotice.visibility = View.GONE
+            binding.etMessage.isEnabled = true
+            binding.btnSend.isEnabled = true
+            binding.etMessage.hint = "메시지를 입력하세요"
         }
     }
 

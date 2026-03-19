@@ -4,8 +4,11 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.chatzar_android.data.remote.dto.ChatRoomResponse
 import com.example.chatzar_android.data.remote.dto.MessageResponse
 import com.example.chatzar_android.data.remote.dto.SocketMessage
+import com.example.chatzar_android.data.repository.ChatRepository
+import com.example.chatzar_android.data.repository.FriendshipRepository
 import com.example.chatzar_android.data.repository.MessageRepository
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,12 +20,18 @@ import ua.naiksoftware.stomp.dto.StompMessage
 sealed class ChatDetailUiState {
     object Idle : ChatDetailUiState()
     object Loading : ChatDetailUiState()
+    data class RoomStatusSuccess(val room: ChatRoomResponse) : ChatDetailUiState()
     data class HistorySuccess(val messages: List<MessageResponse>) : ChatDetailUiState()
     data class NewMessage(val message: MessageResponse) : ChatDetailUiState()
+    object FriendRequestSuccess : ChatDetailUiState()
     data class Error(val message: String) : ChatDetailUiState()
 }
 
-class ChatDetailViewModel(private val repository: MessageRepository) : ViewModel() {
+class ChatDetailViewModel(
+    private val messageRepository: MessageRepository,
+    private val chatRepository: ChatRepository,
+    private val friendshipRepository: FriendshipRepository
+) : ViewModel() {
 
     private val _state = MutableStateFlow<ChatDetailUiState>(ChatDetailUiState.Idle)
     val state: StateFlow<ChatDetailUiState> = _state
@@ -30,12 +39,42 @@ class ChatDetailViewModel(private val repository: MessageRepository) : ViewModel
     private var stompClient: StompClient? = null
     private val gson = Gson()
 
+    // 친구 신청 보내기
+    fun sendFriendRequest(targetId: Long) {
+        viewModelScope.launch {
+            try {
+                val response = friendshipRepository.sendFriendRequest(targetId)
+                if (response.isSuccessful) {
+                    _state.value = ChatDetailUiState.FriendRequestSuccess
+                } else {
+                    _state.value = ChatDetailUiState.Error("친구 신청 실패")
+                }
+            } catch (e: Exception) {
+                _state.value = ChatDetailUiState.Error("네트워크 오류")
+            }
+        }
+    }
+
+    // 방 정보 및 상태 조회
+    fun getChatRoom(roomId: Long) {
+        viewModelScope.launch {
+            try {
+                val response = chatRepository.getChatRoom(roomId)
+                if (response.isSuccessful) {
+                    _state.value = ChatDetailUiState.RoomStatusSuccess(response.body()!!)
+                }
+            } catch (e: Exception) {
+                _state.value = ChatDetailUiState.Error("방 정보 로딩 실패")
+            }
+        }
+    }
+
     // 이전 메시지 로딩
     fun getMessages(roomId: Long) {
         viewModelScope.launch {
             _state.value = ChatDetailUiState.Loading
             try {
-                val response = repository.getRecentMessages(roomId)
+                val response = messageRepository.getRecentMessages(roomId)
                 if (response.isSuccessful) {
                     _state.value = ChatDetailUiState.HistorySuccess(response.body() ?: emptyList())
                 } else {
@@ -49,9 +88,8 @@ class ChatDetailViewModel(private val repository: MessageRepository) : ViewModel
 
     // WebSocket 연결 및 구독
     fun connectAndSubscribe(roomId: Long, wsUrl: String) {
-        stompClient = repository.connectStomp(wsUrl)
-        
-        // 구독 (/sub/rooms/{roomId})
+        stompClient = messageRepository.connectStomp(wsUrl)
+
         stompClient?.topic("/sub/rooms/$roomId")?.subscribe { stompMessage ->
             val message = gson.fromJson(stompMessage.payload, MessageResponse::class.java)
             viewModelScope.launch {
@@ -59,7 +97,6 @@ class ChatDetailViewModel(private val repository: MessageRepository) : ViewModel
             }
         }
 
-        // 연결 상태 모니터링
         stompClient?.lifecycle()?.subscribe { lifecycleEvent ->
             Log.d("ChatDetailViewModel", "Stomp Lifecycle: ${lifecycleEvent.type}")
         }
@@ -79,15 +116,19 @@ class ChatDetailViewModel(private val repository: MessageRepository) : ViewModel
 
     override fun onCleared() {
         super.onCleared()
-        repository.disconnectStomp()
+        messageRepository.disconnectStomp()
     }
 }
 
-class ChatDetailViewModelFactory(private val repository: MessageRepository) : ViewModelProvider.Factory {
+class ChatDetailViewModelFactory(
+    private val messageRepository: MessageRepository,
+    private val chatRepository: ChatRepository,
+    private val friendshipRepository: FriendshipRepository
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ChatDetailViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return ChatDetailViewModel(repository) as T
+            return ChatDetailViewModel(messageRepository, chatRepository, friendshipRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
