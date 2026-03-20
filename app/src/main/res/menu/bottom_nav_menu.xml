@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/friendListFragment"
+        android:icon="@android:drawable/ic_menu_myplaces"
+        android:title="친구" />
+    <item
+        android:id="@+id/chatListFragment"
+        android:icon="@android:drawable/ic_menu_send"
+        android:title="채팅" />
+    <item
+        android:id="@+id/matchStartFragment"
+        android:icon="@android:drawable/ic_menu_search"
+        android:title="매칭" />
+    <item
+        android:id="@+id/myPageFragment"
+        android:icon="@android:drawable/ic_menu_info_details"
+        android:title="더보기" />
+</menu>
