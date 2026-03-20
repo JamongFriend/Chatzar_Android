@@ -28,6 +28,13 @@
         android:label="회원가입"
         tools:layout="@layout/auth_fragment_signup" />
 
+    <!-- 친구 목록 화면 -->
+    <fragment
+        android:id="@+id/friendListFragment"
+        android:name="com.example.chatzar_android.feature.friend.FriendListFragment"
+        android:label="친구 목록"
+        tools:layout="@layout/friend_fragment_list" />
+
     <!-- 채팅 목록 화면 -->
     <fragment
         android:id="@+id/chatListFragment"
@@ -40,6 +47,9 @@
         <action
             android:id="@+id/action_chatList_to_matchPreference"
             app:destination="@id/matchPreferenceFragment" />
+        <action
+            android:id="@+id/action_chatList_to_matchProcess"
+            app:destination="@id/matchProcessFragment" />
         <action
             android:id="@+id/action_chatList_to_myPage"
             app:destination="@id/myPageFragment" />

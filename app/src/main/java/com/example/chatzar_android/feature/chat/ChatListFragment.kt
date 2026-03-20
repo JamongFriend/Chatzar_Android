@@ -51,8 +51,14 @@ class ChatListFragment : Fragment() {
     }
 
     private fun setupListeners() {
+        // 매칭 조건 설정 버튼 (+)
         binding.fabAddChat.setOnClickListener {
             findNavController().navigate(R.id.action_chatList_to_matchPreference)
+        }
+
+        // 즉시 매칭 시작 버튼
+        binding.fabStartMatch.setOnClickListener {
+            findNavController().navigate(R.id.matchProcessFragment)
         }
 
         binding.btnGoMypage.setOnClickListener {
