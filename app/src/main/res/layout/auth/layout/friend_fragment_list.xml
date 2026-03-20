@@ -62,7 +62,7 @@
             android:paddingHorizontal="16dp"
             android:textSize="14sp"
             android:maxLines="1"
-            android:inputType="textNickname" />
+            android:inputType="textPersonName" />
 
         <ImageButton
             android:id="@+id/btn_do_search"
