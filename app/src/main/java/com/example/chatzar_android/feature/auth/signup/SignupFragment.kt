@@ -47,12 +47,31 @@ class SignupFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-        binding.btnSignupSubmit.setOnClickListener {
+        binding.btnSignup.setOnClickListener {
+            val name = binding.etSignupName.text.toString()
+            val ageString = binding.etSignupAge.text.toString()
             val email = binding.etSignupEmail.text.toString()
             val nickname = binding.etSignupNickname.text.toString()
             val password = binding.etSignupPassword.text.toString()
 
-            val request = SignupRequest(email, nickname, password)
+            if (name.isBlank() || ageString.isBlank() || email.isBlank() || nickname.isBlank() || password.isBlank()) {
+                Toast.makeText(requireContext(), "모든 필드를 입력해주세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                Toast.makeText(requireContext(), "올바른 이메일 형식이 아닙니다.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val age = ageString.toLongOrNull() ?: 0L
+            val request = SignupRequest(
+                name = name,
+                email = email,
+                password = password,
+                nickname = nickname,
+                age = age
+            )
             viewModel.signup(request)
         }
     }
