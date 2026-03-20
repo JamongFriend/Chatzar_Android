@@ -51,18 +51,8 @@ class ChatListFragment : Fragment() {
     }
 
     private fun setupListeners() {
-        // 매칭 조건 설정 버튼 (+)
-        binding.fabAddChat.setOnClickListener {
-            findNavController().navigate(R.id.action_chatList_to_matchPreference)
-        }
-
-        // 즉시 매칭 시작 버튼
-        binding.fabStartMatch.setOnClickListener {
-            findNavController().navigate(R.id.matchProcessFragment)
-        }
-
         binding.btnGoMypage.setOnClickListener {
-            findNavController().navigate(R.id.action_chatList_to_myPage)
+            findNavController().navigate(R.id.myPageFragment)
         }
     }
 
@@ -71,7 +61,7 @@ class ChatListFragment : Fragment() {
             val bundle = Bundle().apply {
                 putString("roomId", room.roomId.toString())
             }
-            findNavController().navigate(R.id.action_chatList_to_chatDetail, bundle)
+            findNavController().navigate(R.id.chatDetailFragment, bundle)
         }
         binding.rvChatList.apply {
             layoutManager = LinearLayoutManager(requireContext())

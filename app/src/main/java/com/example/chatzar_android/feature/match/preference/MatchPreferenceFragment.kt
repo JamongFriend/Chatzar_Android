@@ -67,7 +67,7 @@ class MatchPreferenceFragment : Fragment() {
                     is PreferenceUiState.Success -> {
                         binding.btnSavePreference.isEnabled = true
                         Toast.makeText(requireContext(), "저장되었습니다.", Toast.LENGTH_SHORT).show()
-                        findNavController().navigate(R.id.action_matchPreferenceFragment_to_matchStartFragment)
+                        findNavController().popBackStack()
                     }
                     is PreferenceUiState.Error -> {
                         binding.btnSavePreference.isEnabled = true

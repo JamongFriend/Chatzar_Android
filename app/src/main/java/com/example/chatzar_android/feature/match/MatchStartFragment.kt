@@ -25,16 +25,18 @@ class MatchStartFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.cvMatchOption.setOnClickListener {
-            findNavController().popBackStack()
-        }
+        setupListeners()
+    }
 
+    private fun setupListeners() {
+        // 매칭 시작 버튼
         binding.btnStartMatching.setOnClickListener {
             findNavController().navigate(R.id.action_matchStartFragment_to_matchProcessFragment)
         }
 
-        binding.btnMatchBack.setOnClickListener {
-            findNavController().popBackStack()
+        // 조건 수정 버튼 (ID: btn_edit_preference -> btnEditPreference)
+        binding.btnEditPreference.setOnClickListener {
+            findNavController().navigate(R.id.action_matchStartFragment_to_matchPreferenceFragment)
         }
     }
 

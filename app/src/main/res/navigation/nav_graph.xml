@@ -103,6 +103,9 @@
         <action
             android:id="@+id/action_matchStartFragment_to_matchProcessFragment"
             app:destination="@id/matchProcessFragment" />
+        <action
+            android:id="@+id/action_matchStartFragment_to_matchPreferenceFragment"
+            app:destination="@id/matchPreferenceFragment" />
     </fragment>
 
     <!-- 매칭 진행/대기 화면 (Process) -->
