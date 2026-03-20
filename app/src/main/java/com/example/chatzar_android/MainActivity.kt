@@ -41,6 +41,34 @@ class MainActivity : AppCompatActivity() {
         // BottomNavigationView와 NavController 연결
         binding.bottomNav.setupWithNavController(navController)
 
+        // 클릭 리스너를 명시적으로 설정하여 동작 확인
+        binding.bottomNav.setOnItemSelectedListener { item ->
+            // 이미 현재 위치라면 다시 이동하지 않음
+            if (navController.currentDestination?.id == item.itemId) {
+                return@setOnItemSelectedListener true
+            }
+
+            when (item.itemId) {
+                R.id.friendListFragment -> {
+                    navController.navigate(R.id.friendListFragment)
+                    true
+                }
+                R.id.chatListFragment -> {
+                    navController.navigate(R.id.chatListFragment)
+                    true
+                }
+                R.id.matchStartFragment -> {
+                    navController.navigate(R.id.matchStartFragment)
+                    true
+                }
+                R.id.myPageFragment -> {
+                    navController.navigate(R.id.myPageFragment)
+                    true
+                }
+                else -> false
+            }
+        }
+
         // 특정 화면에서만 하단 바 보이기/숨기기
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {

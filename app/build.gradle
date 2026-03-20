@@ -30,10 +30,7 @@ android {
     sourceSets {
         main {
             res.srcDirs = [
-                    'src/main/res/layout/auth',
-                    'src/main/res/layout/chat',
-                    'src/main/res/layout/common',
-                    'src/main/res/navigation',
+                    'src/main/res/layout',
                     'src/main/res'
             ]
         }
