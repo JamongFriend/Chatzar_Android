@@ -44,12 +44,22 @@ class ChatDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        roomId = arguments?.getString("roomId")?.toLongOrNull() ?: -1
+        // roomId를 String 또는 Long으로 유연하게 받기
+        val roomIdRaw = arguments?.get("roomId")
+        roomId = when (roomIdRaw) {
+            is String -> roomIdRaw.toLongOrNull() ?: -1L
+            is Long -> roomIdRaw
+            else -> -1L
+        }
+
+        android.util.Log.d("ChatDetailFragment", "Received roomId: $roomId")
+
         if (roomId == -1L) {
-            Toast.makeText(requireContext(), "잘못된 접근입니다.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "잘못된 채팅방 접근입니다.", Toast.LENGTH_SHORT).show()
             findNavController().popBackStack()
             return
         }
+
 
         setupViewModel()
         setupRecyclerView()
@@ -59,8 +69,9 @@ class ChatDetailFragment : Fragment() {
         viewModel.getChatRoom(roomId)
         viewModel.getMessages(roomId)
 
-        val wsUrl = "ws://10.0.2.2:8080/ws/chat"
-        viewModel.connectAndSubscribe(roomId, wsUrl)
+        val wsUrl = "ws://10.0.2.2:8080/ws"
+        val token = tokenManager.getToken()
+        viewModel.connectAndSubscribe(roomId, wsUrl, token)
     }
 
     private fun setupViewModel() {
@@ -113,15 +124,24 @@ class ChatDetailFragment : Fragment() {
                 when (state) {
                     is ChatDetailUiState.RoomStatusSuccess -> {
                         otherMemberId = state.room.otherMemberId
+                        binding.tvChatRoomName.text = state.room.otherNickname
                         updateLockState(state.room.status)
                     }
                     is ChatDetailUiState.HistorySuccess -> {
                         adapter.submitList(state.messages)
-                        binding.rvChatMessages.scrollToPosition(adapter.itemCount - 1)
+                        binding.rvChatMessages.post {
+                            if (adapter.itemCount > 0) {
+                                binding.rvChatMessages.scrollToPosition(adapter.itemCount - 1)
+                            }
+                        }
                     }
                     is ChatDetailUiState.NewMessage -> {
                         adapter.addMessage(state.message)
-                        binding.rvChatMessages.smoothScrollToPosition(adapter.itemCount - 1)
+                        binding.rvChatMessages.post {
+                            if (adapter.itemCount > 0) {
+                                binding.rvChatMessages.smoothScrollToPosition(adapter.itemCount - 1)
+                            }
+                        }
                     }
                     is ChatDetailUiState.FriendRequestSuccess -> {
                         Toast.makeText(requireContext(), "친구 신청을 보냈습니다.", Toast.LENGTH_SHORT).show()

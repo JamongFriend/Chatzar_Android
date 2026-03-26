@@ -15,7 +15,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import ua.naiksoftware.stomp.StompClient
-import ua.naiksoftware.stomp.dto.StompMessage
+import ua.naiksoftware.stomp.dto.LifecycleEvent
+import io.reactivex.disposables.CompositeDisposable
 
 sealed class ChatDetailUiState {
     object Idle : ChatDetailUiState()
@@ -38,6 +39,8 @@ class ChatDetailViewModel(
 
     private var stompClient: StompClient? = null
     private val gson = Gson()
+    private val compositeDisposable = CompositeDisposable()
+    private var isSubscribed = false
 
     // 친구 신청 보내기
     fun sendFriendRequest(targetId: Long) {
@@ -86,58 +89,83 @@ class ChatDetailViewModel(
         }
     }
 
-    // WebSocket 연결 및 구독
-    fun connectAndSubscribe(roomId: Long, wsUrl: String) {
+    // WebSocket 연결 및 구독 로직 통합
+    fun connectAndSubscribe(roomId: Long, wsUrl: String, accessToken: String? = null) {
         if (stompClient != null && stompClient!!.isConnected) return
 
-        stompClient = messageRepository.connectStomp(wsUrl)
+        stompClient = messageRepository.connectStomp(wsUrl, accessToken)
+        isSubscribed = false
 
-        // 토픽 구독 시 에러 핸들러 추가
-        stompClient?.topic("/sub/rooms/$roomId")?.subscribe({ stompMessage ->
-            val message = gson.fromJson(stompMessage.payload, MessageResponse::class.java)
-            viewModelScope.launch {
-                _state.value = ChatDetailUiState.NewMessage(message)
-            }
-        }, { error ->
-            Log.e("ChatDetailViewModel", "Topic Subscription Error", error)
-            viewModelScope.launch {
-                _state.value = ChatDetailUiState.Error("실시간 메시지 수신에 실패했습니다.")
-            }
-        })
-
-        // 연결 상태 모니터링 및 에러 핸들러 추가
-        stompClient?.lifecycle()?.subscribe({ lifecycleEvent ->
+        // 라이프사이클 이벤트를 먼저 구독하여 연결 성공 시점에 토픽 구독 진행
+        val lifecycleDisposable = stompClient?.lifecycle()?.subscribe({ lifecycleEvent ->
             when (lifecycleEvent.type) {
-                ua.naiksoftware.stomp.dto.LifecycleEvent.Type.OPENED -> {
+                LifecycleEvent.Type.OPENED -> {
                     Log.d("ChatDetailViewModel", "Stomp Connection Opened")
+                    subscribeToRoomTopic(roomId)
                 }
-                ua.naiksoftware.stomp.dto.LifecycleEvent.Type.ERROR -> {
+                LifecycleEvent.Type.ERROR -> {
                     Log.e("ChatDetailViewModel", "Stomp Connection Error", lifecycleEvent.exception)
+                    viewModelScope.launch {
+                        _state.value = ChatDetailUiState.Error("연결 오류가 발생했습니다.")
+                    }
                 }
-                ua.naiksoftware.stomp.dto.LifecycleEvent.Type.CLOSED -> {
+                LifecycleEvent.Type.CLOSED -> {
                     Log.d("ChatDetailViewModel", "Stomp Connection Closed")
+                    isSubscribed = false
                 }
                 else -> {}
             }
         }, { error ->
             Log.e("ChatDetailViewModel", "Stomp Lifecycle Error", error)
         })
+
+        lifecycleDisposable?.let { compositeDisposable.add(it) }
+    }
+
+    private fun subscribeToRoomTopic(roomId: Long) {
+        if (isSubscribed) return
+
+        val topicDisposable = stompClient?.topic("/sub/rooms/$roomId")?.subscribe({ stompMessage ->
+            val message = gson.fromJson(stompMessage.payload, MessageResponse::class.java)
+            viewModelScope.launch {
+                _state.value = ChatDetailUiState.NewMessage(message)
+            }
+        }, { error ->
+            Log.e("ChatDetailViewModel", "Topic Subscription Error", error)
+        })
+
+        topicDisposable?.let {
+            compositeDisposable.add(it)
+            isSubscribed = true
+            Log.d("ChatDetailViewModel", "Subscribed to /sub/rooms/$roomId")
+        }
     }
 
     // 메시지 전송 (/pub/chat)
     fun sendMessage(roomId: Long, content: String) {
+        if (stompClient == null || !stompClient!!.isConnected) {
+            _state.value = ChatDetailUiState.Error("연결이 끊어져 있습니다. 잠시 후 다시 시도하세요.")
+            return
+        }
+
         val socketMessage = SocketMessage("SEND", roomId, content)
         val payload = gson.toJson(socketMessage)
         
-        stompClient?.send("/pub/chat", payload)?.subscribe({
+        val sendDisposable = stompClient?.send("/pub/chat", payload)?.subscribe({
             Log.d("ChatDetailViewModel", "Message Sent: $content")
         }, { error ->
             Log.e("ChatDetailViewModel", "Send Error", error)
+            viewModelScope.launch {
+                _state.value = ChatDetailUiState.Error("메시지 전송 실패")
+            }
         })
+        
+        sendDisposable?.let { compositeDisposable.add(it) }
     }
 
     override fun onCleared() {
         super.onCleared()
+        compositeDisposable.clear()
         messageRepository.disconnectStomp()
     }
 }

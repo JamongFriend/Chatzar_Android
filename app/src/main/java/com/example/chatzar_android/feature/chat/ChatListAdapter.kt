@@ -29,7 +29,7 @@ class ChatListAdapter(
         RecyclerView.ViewHolder(binding.root) {
         
         fun bind(room: ChatRoomResponse) {
-            binding.tvRoomName.text = "상대방 (ID: ${room.otherMemberId})"
+            binding.tvRoomName.text = room.otherNickname
             binding.tvLastMessage.text = "대화방 입장하기"
             binding.tvTime.text = "" // 추후 메시지 시간 추가 가능
 
