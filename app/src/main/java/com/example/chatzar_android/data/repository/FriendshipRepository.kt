@@ -16,4 +16,8 @@ class FriendshipRepository(private val api: FriendshipApi) {
     suspend fun acceptFriendRequest(friendshipId: Long): Response<Void> {
         return api.acceptFriendRequest(friendshipId)
     }
+
+    suspend fun getFriendList(): Response<List<com.example.chatzar_android.data.remote.dto.FriendListResponse>> {
+        return api.getFriendList()
+    }
 }

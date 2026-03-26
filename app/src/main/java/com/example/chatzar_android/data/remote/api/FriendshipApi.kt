@@ -19,4 +19,7 @@ interface FriendshipApi {
     suspend fun acceptFriendRequest(
         @Path("friendshipId") friendshipId: Long
     ): Response<Void>
+
+    @GET("api/v1/friends/list")
+    suspend fun getFriendList(): Response<List<com.example.chatzar_android.data.remote.dto.FriendListResponse>>
 }

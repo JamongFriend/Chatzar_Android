@@ -33,7 +33,11 @@
         android:id="@+id/friendListFragment"
         android:name="com.example.chatzar_android.feature.friend.FriendListFragment"
         android:label="친구 목록"
-        tools:layout="@layout/friend_fragment_list" />
+        tools:layout="@layout/friend_fragment_list">
+        <action
+            android:id="@+id/action_friendList_to_friendRequests"
+            app:destination="@id/friendRequestsFragment" />
+    </fragment>
 
     <!-- 채팅 목록 화면 -->
     <fragment
