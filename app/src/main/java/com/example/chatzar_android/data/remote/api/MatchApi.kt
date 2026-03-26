@@ -12,6 +12,10 @@ interface MatchApi {
         @Body request: MatchConditionRequest
     ): Response<Unit>
 
+    // 매칭 조건 조회
+    @GET("api/v1/match-preference/preference")
+    suspend fun getPreference(): Response<MatchConditionRequest>
+
     // 매칭 요청 시작 (즉시 매칭될 수도 있음)
     @POST("api/v1/match/request")
     suspend fun requestMatch(): Response<MatchResponse>

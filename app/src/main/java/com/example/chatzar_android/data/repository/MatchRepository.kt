@@ -11,6 +11,10 @@ class MatchRepository(private val matchApi: MatchApi) {
         return matchApi.updatePreference(request)
     }
 
+    suspend fun getPreference(): Response<MatchConditionRequest> {
+        return matchApi.getPreference()
+    }
+
     suspend fun requestMatch(): Response<MatchResponse> {
         return matchApi.requestMatch()
     }

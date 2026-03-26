@@ -20,6 +20,7 @@ class MatchProcessFragment : Fragment() {
     private var _binding: MatchFragmentMatchingProcessBinding? = null
     private val binding get() = _binding!!
     private lateinit var viewModel: MatchViewModel
+    private var isNavigated = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,6 +62,9 @@ class MatchProcessFragment : Fragment() {
                         binding.tvMatchingStatus.text = "최적의 상대를 찾는 중..."
                     }
                     is MatchUiState.Matched -> {
+                        if (isNavigated) return@collect
+                        isNavigated = true
+
                         Toast.makeText(requireContext(), "${state.partnerNickname}님과 매칭되었습니다!", Toast.LENGTH_SHORT).show()
 
                         val bundle = Bundle().apply {

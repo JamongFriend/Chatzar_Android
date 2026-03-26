@@ -33,8 +33,8 @@ class MatchViewModel(private val repository: MatchRepository) : ViewModel() {
                 val response = repository.requestMatch()
                 if (response.isSuccessful) {
                     val result = response.body()
-                    if (result?.matched == true) {
-                        _state.value = MatchUiState.Matched(result.chatRoomId!!, result.partnerNickname ?: "알 수 없음")
+                    if (result?.matched == true && result.chatRoomId != null) {
+                        _state.value = MatchUiState.Matched(result.chatRoomId, result.partnerNickname ?: "알 수 없음")
                     } else {
                         _state.value = MatchUiState.Waiting
                         startPollingStatus()
@@ -57,8 +57,8 @@ class MatchViewModel(private val repository: MatchRepository) : ViewModel() {
                     val response = repository.getMatchStatus()
                     if (response.isSuccessful) {
                         val result = response.body()
-                        if (result?.matched == true) {
-                            _state.value = MatchUiState.Matched(result.chatRoomId!!, result.partnerNickname ?: "알 수 없음")
+                        if (result?.matched == true && result.chatRoomId != null) {
+                            _state.value = MatchUiState.Matched(result.chatRoomId, result.partnerNickname ?: "알 수 없음")
                             break
                         }
                     }
