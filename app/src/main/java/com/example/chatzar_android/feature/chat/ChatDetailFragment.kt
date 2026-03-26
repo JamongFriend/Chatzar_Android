@@ -100,6 +100,7 @@ class ChatDetailFragment : Fragment() {
 
     private fun setupListeners() {
         binding.btnChatBack.setOnClickListener {
+            viewModel.closeChatRoom(roomId)
             findNavController().popBackStack()
         }
 

@@ -17,4 +17,8 @@ class ChatRepository(private val chatApi: ChatApi) {
     suspend fun deleteChatRoom(roomId: Long): Response<Unit> {
         return chatApi.deleteChatRoom(roomId)
     }
+
+    suspend fun closeChatRoom(roomId: Long): Response<Unit> {
+        return chatApi.closeChatRoom(roomId)
+    }
 }

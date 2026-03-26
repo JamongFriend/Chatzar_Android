@@ -89,6 +89,17 @@ class ChatDetailViewModel(
         }
     }
 
+    // 방 종료/잠금 요청
+    fun closeChatRoom(roomId: Long) {
+        viewModelScope.launch {
+            try {
+                chatRepository.closeChatRoom(roomId)
+            } catch (e: Exception) {
+                Log.e("ChatDetailViewModel", "Close Room Error", e)
+            }
+        }
+    }
+
     // WebSocket 연결 및 구독 로직 통합
     fun connectAndSubscribe(roomId: Long, wsUrl: String, accessToken: String? = null) {
         if (stompClient != null && stompClient!!.isConnected) return
