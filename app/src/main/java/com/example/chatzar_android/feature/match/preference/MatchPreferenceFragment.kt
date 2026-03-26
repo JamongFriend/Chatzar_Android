@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.chatzar_android.core.network.ApiClient
 import com.example.chatzar_android.data.remote.api.MatchApi
+import com.example.chatzar_android.data.remote.dto.MatchConditionRequest
 import com.example.chatzar_android.data.repository.MatchRepository
 import com.example.chatzar_android.databinding.MatchFragmentPreferenceBinding
 import com.example.chatzar_android.R
@@ -20,6 +21,7 @@ class MatchPreferenceFragment : Fragment() {
     private var _binding: MatchFragmentPreferenceBinding? = null
     private val binding get() = _binding!!
     private lateinit var viewModel: MatchPreferenceViewModel
+    private var isInitialFetch = true
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,6 +38,8 @@ class MatchPreferenceFragment : Fragment() {
         setupViewModel()
         setupListeners()
         observeState()
+
+        viewModel.fetchPreference()
     }
 
     private fun setupViewModel() {
@@ -62,12 +66,16 @@ class MatchPreferenceFragment : Fragment() {
                     is PreferenceUiState.Idle -> Unit
                     is PreferenceUiState.Loading -> {
                         binding.btnSavePreference.isEnabled = false
-                        Toast.makeText(requireContext(), "저장 중...", Toast.LENGTH_SHORT).show()
                     }
                     is PreferenceUiState.Success -> {
                         binding.btnSavePreference.isEnabled = true
-                        Toast.makeText(requireContext(), "저장되었습니다.", Toast.LENGTH_SHORT).show()
-                        findNavController().popBackStack()
+                        if (isInitialFetch) {
+                            state.preference?.let { populateFields(it) }
+                            isInitialFetch = false
+                        } else {
+                            Toast.makeText(requireContext(), "저장되었습니다.", Toast.LENGTH_SHORT).show()
+                            findNavController().popBackStack()
+                        }
                     }
                     is PreferenceUiState.Error -> {
                         binding.btnSavePreference.isEnabled = true
@@ -78,10 +86,23 @@ class MatchPreferenceFragment : Fragment() {
         }
     }
 
+    private fun populateFields(preference: MatchConditionRequest) {
+        when (preference.genderPreference) {
+            "MALE" -> binding.rgGender.check(R.id.rb_gender_male)
+            "FEMALE" -> binding.rgGender.check(R.id.rb_gender_female)
+            else -> binding.rgGender.check(R.id.rb_gender_any)
+        }
+        binding.etMinAge.setText(preference.minAge?.toString() ?: "20")
+        binding.etMaxAge.setText(preference.maxAge?.toString() ?: "40")
+        binding.etTopic.setText(preference.topic ?: "")
+        binding.etRegion.setText(preference.region ?: "")
+    }
+
     private fun savePreference() {
+        isInitialFetch = false
         val gender = when (binding.rgGender.checkedRadioButtonId) {
-            binding.rbGenderMale.id -> "MALE"
-            binding.rbGenderFemale.id -> "FEMALE"
+            R.id.rb_gender_male -> "MALE"
+            R.id.rb_gender_female -> "FEMALE"
             else -> "ANY"
         }
         val minAge = binding.etMinAge.text.toString().toIntOrNull() ?: 20

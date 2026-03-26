@@ -88,18 +88,40 @@ class ChatDetailViewModel(
 
     // WebSocket 연결 및 구독
     fun connectAndSubscribe(roomId: Long, wsUrl: String) {
+        if (stompClient != null && stompClient!!.isConnected) return
+
         stompClient = messageRepository.connectStomp(wsUrl)
 
-        stompClient?.topic("/sub/rooms/$roomId")?.subscribe { stompMessage ->
+        // 토픽 구독 시 에러 핸들러 추가
+        stompClient?.topic("/sub/rooms/$roomId")?.subscribe({ stompMessage ->
             val message = gson.fromJson(stompMessage.payload, MessageResponse::class.java)
             viewModelScope.launch {
                 _state.value = ChatDetailUiState.NewMessage(message)
             }
-        }
+        }, { error ->
+            Log.e("ChatDetailViewModel", "Topic Subscription Error", error)
+            viewModelScope.launch {
+                _state.value = ChatDetailUiState.Error("실시간 메시지 수신에 실패했습니다.")
+            }
+        })
 
-        stompClient?.lifecycle()?.subscribe { lifecycleEvent ->
-            Log.d("ChatDetailViewModel", "Stomp Lifecycle: ${lifecycleEvent.type}")
-        }
+        // 연결 상태 모니터링 및 에러 핸들러 추가
+        stompClient?.lifecycle()?.subscribe({ lifecycleEvent ->
+            when (lifecycleEvent.type) {
+                ua.naiksoftware.stomp.dto.LifecycleEvent.Type.OPENED -> {
+                    Log.d("ChatDetailViewModel", "Stomp Connection Opened")
+                }
+                ua.naiksoftware.stomp.dto.LifecycleEvent.Type.ERROR -> {
+                    Log.e("ChatDetailViewModel", "Stomp Connection Error", lifecycleEvent.exception)
+                }
+                ua.naiksoftware.stomp.dto.LifecycleEvent.Type.CLOSED -> {
+                    Log.d("ChatDetailViewModel", "Stomp Connection Closed")
+                }
+                else -> {}
+            }
+        }, { error ->
+            Log.e("ChatDetailViewModel", "Stomp Lifecycle Error", error)
+        })
     }
 
     // 메시지 전송 (/pub/chat)

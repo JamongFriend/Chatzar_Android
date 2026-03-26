@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 sealed class PreferenceUiState {
     object Idle : PreferenceUiState()
     object Loading : PreferenceUiState()
-    object Success : PreferenceUiState()
+    data class Success(val preference: MatchConditionRequest? = null) : PreferenceUiState()
     data class Error(val message: String) : PreferenceUiState()
 }
 
@@ -21,6 +21,22 @@ class MatchPreferenceViewModel(private val repository: MatchRepository) : ViewMo
     private val _state = MutableStateFlow<PreferenceUiState>(PreferenceUiState.Idle)
     val state: StateFlow<PreferenceUiState> = _state
 
+    fun fetchPreference() {
+        viewModelScope.launch {
+            _state.value = PreferenceUiState.Loading
+            try {
+                val response = repository.getPreference()
+                if (response.isSuccessful) {
+                    _state.value = PreferenceUiState.Success(response.body())
+                } else {
+                    _state.value = PreferenceUiState.Error("데이터를 불러오는 데 실패했습니다: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                _state.value = PreferenceUiState.Error(e.message ?: "알 수 없는 오류가 발생했습니다.")
+            }
+        }
+    }
+
     fun updatePreference(gender: String, minAge: Int, maxAge: Int, topic: String, region: String) {
         viewModelScope.launch {
             _state.value = PreferenceUiState.Loading
@@ -28,7 +44,7 @@ class MatchPreferenceViewModel(private val repository: MatchRepository) : ViewMo
                 val request = MatchConditionRequest(gender, minAge, maxAge, topic, region)
                 val response = repository.updatePreference(request)
                 if (response.isSuccessful) {
-                    _state.value = PreferenceUiState.Success
+                    _state.value = PreferenceUiState.Success()
                 } else {
                     _state.value = PreferenceUiState.Error("저장에 실패했습니다: ${response.code()}")
                 }
