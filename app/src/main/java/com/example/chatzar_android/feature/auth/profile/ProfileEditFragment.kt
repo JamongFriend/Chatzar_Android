@@ -9,19 +9,19 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.example.chatzar_android.R
 import com.example.chatzar_android.core.network.ApiClient
 import com.example.chatzar_android.core.network.TokenManager
 import com.example.chatzar_android.data.remote.api.MemberApi
 import com.example.chatzar_android.data.repository.MemberRepository
-import com.example.chatzar_android.databinding.MemberFragmentProfileBinding
+import com.example.chatzar_android.databinding.MemberFragmentProfileEditBinding
 import kotlinx.coroutines.launch
 
-class MyPageFragment : Fragment() {
-    private var _binding: MemberFragmentProfileBinding? = null
+class ProfileEditFragment : Fragment() {
+    private var _binding: MemberFragmentProfileEditBinding? = null
     private val binding get() = _binding!!
     private lateinit var tokenManager: TokenManager
-    private lateinit var viewModel: MyPageViewModel
+    private lateinit var viewModel: ProfileEditViewModel
+    private var currentMemberId: Long = -1L
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,7 +29,7 @@ class MyPageFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         tokenManager = TokenManager(requireContext())
-        _binding = MemberFragmentProfileBinding.inflate(inflater, container, false)
+        _binding = MemberFragmentProfileEditBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -40,39 +40,31 @@ class MyPageFragment : Fragment() {
         setupListeners()
         observeState()
 
-        // 내 정보 불러오기
-        val myId = tokenManager.getMemberId()
-        if (myId != -1L) {
-            viewModel.getMember(myId)
+        currentMemberId = tokenManager.getMemberId()
+        if (currentMemberId != -1L) {
+            viewModel.getMember(currentMemberId)
         }
     }
 
     private fun setupViewModel() {
         val api = ApiClient.retrofit.create(MemberApi::class.java)
         val repository = MemberRepository(api)
-        val factory = MyPageViewModelFactory(repository)
-        viewModel = ViewModelProvider(this, factory)[MyPageViewModel::class.java]
+        val factory = ProfileEditViewModelFactory(repository)
+        viewModel = ViewModelProvider(this, factory)[ProfileEditViewModel::class.java]
     }
 
     private fun setupListeners() {
-        binding.btnMemberProfileBack.setOnClickListener {
+        binding.btnProfileEditBack.setOnClickListener {
             findNavController().popBackStack()
         }
 
-        binding.btnMemberEdit.setOnClickListener {
-            findNavController().navigate(R.id.action_myPage_to_profileEdit)
-        }
-
-        binding.btnMatchPreference.setOnClickListener {
-            findNavController().navigate(R.id.action_myPage_to_matchPreference)
-        }
-
-        binding.btnFriendRequests.setOnClickListener {
-            findNavController().navigate(R.id.action_myPage_to_friendRequests)
-        }
-
-        binding.btnLogout.setOnClickListener {
-            logout()
+        binding.tvProfileEditSave.setOnClickListener {
+            val newNickname = binding.etProfileEditNickname.text.toString().trim()
+            if (newNickname.isNotEmpty()) {
+                viewModel.updateMember(currentMemberId, newNickname)
+            } else {
+                Toast.makeText(requireContext(), "닉네임을 입력해주세요.", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -80,28 +72,26 @@ class MyPageFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.state.collect { state ->
                 when (state) {
-                    is MyPageUiState.Loading -> {
-                        binding.pbProfileLoading.visibility = View.VISIBLE
+                    is ProfileEditUiState.Loading -> {
+                        binding.pbProfileEditLoading.visibility = View.VISIBLE
                     }
-                    is MyPageUiState.Success -> {
-                        binding.pbProfileLoading.visibility = View.GONE
-                        binding.tvMemberNickname.text = state.member.nickname
-                        binding.tvMemberEmail.text = state.member.email
+                    is ProfileEditUiState.LoadSuccess -> {
+                        binding.pbProfileEditLoading.visibility = View.GONE
+                        binding.etProfileEditNickname.setText(state.member.nickname)
                     }
-                    is MyPageUiState.Error -> {
-                        binding.pbProfileLoading.visibility = View.GONE
+                    is ProfileEditUiState.UpdateSuccess -> {
+                        binding.pbProfileEditLoading.visibility = View.GONE
+                        Toast.makeText(requireContext(), "프로필이 수정되었습니다.", Toast.LENGTH_SHORT).show()
+                        findNavController().popBackStack()
+                    }
+                    is ProfileEditUiState.Error -> {
+                        binding.pbProfileEditLoading.visibility = View.GONE
                         Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
                     }
                     else -> Unit
                 }
             }
         }
-    }
-
-    private fun logout() {
-        tokenManager.clear()
-        Toast.makeText(requireContext(), "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show()
-        findNavController().navigate(R.id.loginFragment)
     }
 
     override fun onDestroyView() {

@@ -71,6 +71,9 @@
         <action
             android:id="@+id/action_myPage_to_friendRequests"
             app:destination="@id/friendRequestsFragment" />
+        <action
+            android:id="@+id/action_myPage_to_matchPreference"
+            app:destination="@id/matchPreferenceFragment" />
     </fragment>
 
     <!-- 친구 요청 목록 화면 -->
