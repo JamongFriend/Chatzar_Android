@@ -13,6 +13,7 @@ import com.example.chatzar_android.core.network.ApiClient
 import com.example.chatzar_android.data.remote.api.AuthApi
 import com.example.chatzar_android.data.remote.dto.SignupRequest
 import com.example.chatzar_android.data.repository.AuthRepository
+import com.example.chatzar_android.R
 import com.example.chatzar_android.databinding.AuthFragmentSignupBinding
 import kotlinx.coroutines.launch
 
@@ -53,9 +54,19 @@ class SignupFragment : Fragment() {
             val email = binding.etSignupEmail.text.toString()
             val nickname = binding.etSignupNickname.text.toString()
             val password = binding.etSignupPassword.text.toString()
+            val gender = when (binding.rgSignupGender.checkedRadioButtonId) {
+                R.id.rb_male -> "MALE"
+                R.id.rb_female -> "FEMALE"
+                else -> null
+            }
 
             if (name.isBlank() || ageString.isBlank() || email.isBlank() || nickname.isBlank() || password.isBlank()) {
                 Toast.makeText(requireContext(), "모든 필드를 입력해주세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (gender == null) {
+                Toast.makeText(requireContext(), "성별을 선택해주세요.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -70,7 +81,8 @@ class SignupFragment : Fragment() {
                 email = email,
                 password = password,
                 nickname = nickname,
-                age = age
+                age = age,
+                gender = gender
             )
             viewModel.signup(request)
         }
